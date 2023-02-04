@@ -2,12 +2,11 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const PostSchema = new Schema({
-    title: { type: String, required: true },
+    user: { type: Schema.Types.ObjectId, ref: "User" },
     body: { type: String, required: true },
     time: { type: Date, default: Date.now },
-    published: { type: Boolean, default: true },
-    username: { type: String, required: true },
-    comments: { type: Array, default: []},
+    comments: [{ type: Schema.Types.ObjectId, ref: "Comment" }],
+    likes: [{ type: Schema.Types.ObjectId, ref: "User"}],
 });
 
 module.exports = mongoose.model("Post", PostSchema);
