@@ -1,5 +1,4 @@
 const Post = require("../models/post");
-const commentRouter = require("./comment");
 const router = require("express").Router();
 const jwt = require("jsonwebtoken");
 const auth = require("../middleware/auth");
