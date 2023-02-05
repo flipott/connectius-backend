@@ -25,7 +25,7 @@ app.get("/", (req, res) => {
 
 app.use("/user", routes.user);
 app.use("/post", routes.post);
-// app.use("/comment", routes.comment);
+app.use("/comment", routes.comment);
 app.use("/register", routes.register);
 
 app.listen(port, () => console.log(`Server is currently running on port ${port}.`));
