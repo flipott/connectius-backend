@@ -24,7 +24,7 @@ app.get("/", (req, res) => {
 })
 
 app.use("/user", routes.user);
-// app.use("/post", routes.post);
+app.use("/post", routes.post);
 // app.use("/comment", routes.comment);
 app.use("/register", routes.register);
 
