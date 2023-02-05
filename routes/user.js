@@ -1,4 +1,5 @@
 const User = require("../models/user");
+const postRoute = require("./post");
 const router = require("express").Router();
 const jwt = require("jsonwebtoken");
 const auth = require("../middleware/auth");
@@ -35,5 +36,10 @@ router.delete("/:userId", (req, res, next) => {
         res.json(results);
     });
 });
+
+// Create user post
+router.use("/:userId/post", postRoute);
+
+
 
 module.exports = router;

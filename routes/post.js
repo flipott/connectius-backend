@@ -1,74 +1,96 @@
 const Post = require("../models/post");
-const router = require("express").Router();
+const User = require("../models/user");
+const mongoose = require("mongoose");
+const Schema = mongoose.Schema;
+const router = require("express").Router({ mergeParams: true });
 const jwt = require("jsonwebtoken");
 const auth = require("../middleware/auth");
 require('dotenv').config()
 
-// // Get all posts
-// router.get("/", (req, res) => {
-//     Post.find({}, (err, results) => {
-//         if (err) {
-//             return next(err);
-//         }
-//         res.send(results);
-//     });
-// });
+// Get posts
+router.get("/", (req, res, next) => {
+    // If getting specific user posts
+    if (req.params.userId) {
+        Post.find({ user: req.params.userId }, (err, results) => {
+            if (err) {
+                return next(err);
+            }
+            res.json(results);
+        });
+    } else {
+    // If getting all posts
+        Post.find({}, (err, results) => {
+            if (err) {
+                return next(err);
+            }
+            res.json(results);
+        });
+    }
+});
 
-// // Create new post
-// router.post("/", auth, (req, res, next) => {
-//     jwt.verify(req.token, process.env.SECRET_KEY, (err, data) => {
-//         if (err) {
-//             res.sendStatus(403);
-//         } else {
-//             const post = new Post({
-//                 title: req.body.title,
-//                 body: req.body.body,
-//                 username: req.body.username,
-//             }).save((err, results) => {
-//                 if (err) {
-//                     return next(err);
-//                 }
-//                 res.send("Post successfully created.");
-//             });
-//         }
-//     });
-// });
+// Get specific post
+router.get("/:postId", (req, res, next) => {
+    if (req.params.userId) {
+        Post.find({ _id: req.params.postId, user: req.params.userId }, (err, results) => {
+            if (err) {
+                return next(err);
+            }
+            res.json(results);
+        });
+    } else {
+        res.json("Must have user ID in URI");
+    }
+})
 
-// // Get specific post
-// router.get("/:postId", (req, res, next) => {
-//     Post.find({ _id: req.params.postId }, (err, results) => {
-//         if (err) {
-//             return next(err);
-//         }
-//         res.send(results);
-//     });
-// });
+// Create post
+router.post("/", (req, res, next) => {
+    if (req.params.userId) {
+        const post = new Post({
+            user: mongoose.Types.ObjectId(req.params.userId),
+            body: req.body.body,
+        }).save((err, results) => {
+            if (err) {
+                return next(err);
+            }
+            User.findByIdAndUpdate(
+                req.params.userId,
+                { $push: { posts: results._id } },
+                { new: true },
+                (userErr, userResults) => {
+                    if (userErr) {
+                        return next(userErr);
+                    }
+                    res.json(userResults);
+                }
+            );
+        });
+    }
+});
 
-// // Update specific post
-// router.put("/:postId", (req, res, next) => {
-//     Post.findByIdAndUpdate(
-//         req.params.postId,
-//         {
-//             title: req.body.title,
-//             body: req.body.body
-//         },
-//         {safe: true, upsert: true, new : true},
-//         (err, results) => {
-//             if (err) {
-//                 return next(err);
-//             }
-//             res.send("Successfully updated post.");
-//         });
-// });
+// Delete post
+router.delete("/:postId", (req, res, next) => {
+    if (req.params.userId) {
+        Post.findByIdAndDelete(req.params.postId, (err, results) => {
+            if (err) {
+                return next(err);
+            } else if (results) {
+                User.findByIdAndUpdate(
+                    req.params.userId,
+                    { $pull: { posts: results._id } },
+                    { new: true},
+                    (userErr, userResults) => {
+                        if (userErr) {
+                            return next(userErr);
+                        }
+                        res.json(userResults);
+                    }
+                );
+            } else {
+                res.json("Could not find post");
+            }
 
-// // Delete specific post
-// router.delete("/:postId", (req, res, next) => {
-//     Post.findByIdAndDelete(req.params.postId, (err, results) => {
-//         if (err) {
-//             return next(err);
-//         }
-//         res.send("Successfully deleted post.");
-//     });
-// });
+        });
+    }
+});
 
 module.exports = router;
