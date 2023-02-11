@@ -2,6 +2,7 @@ const User = require("../models/user");
 const router = require("express").Router();
 const jwt = require("jsonwebtoken");
 const auth = require("../middleware/auth");
+const bcrypt = require("bcryptjs");
 const { body, validationResult } = require("express-validator");
 require('dotenv').config()
 
@@ -31,27 +32,32 @@ router.post(
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             return res.status(400).json({ errors: errors.array()}); 
-        } 
+        }
 
-        User.find({ email: req.body.email }, (err, results) => {
+        bcrypt.hash(req.body.password, 10, (err, hashedPassword) => {
             if (err) {
                 return next(err);
             }
-            if (!results.length) {
-                const user = new User({
-                    firstName: req.body["first-name"],
-                    lastName: req.body["last-name"],
-                    email: req.body.email,
-                    password: req.body.password,
-                }).save((err, results) => {
-                    if (err) {
-                        return next(err);
-                    }
-                    res.json(results);
-                });
-            } else {
-                return res.status(400).json({ errors: [{"msg": "Account already exists"}]});
-            }
+            User.find({ email: req.body.email }, (err, results) => {
+                if (err) {
+                    return next(err);
+                }
+                if (!results.length) {
+                    const user = new User({
+                        firstName: req.body["first-name"],
+                        lastName: req.body["last-name"],
+                        email: req.body.email,
+                        password: hashedPassword,
+                    }).save((err, results) => {
+                        if (err) {
+                            return next(err);
+                        }
+                        res.json(results);
+                    });
+                } else {
+                    return res.status(400).json({ errors: [{"msg": "Account already exists"}]});
+                }
+            });
         });
     }
 );
