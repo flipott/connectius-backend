@@ -20,12 +20,15 @@ app.use(cors());
 
 
 app.get("/", (req, res) => {
-    res.send("Works")
-})
+});
+
+
 
 app.use("/user", routes.user);
 app.use("/post", routes.post);
 app.use("/comment", routes.comment);
 app.use("/register", routes.register);
+app.use("/login", routes.login);
+app.use("/auth", routes.auth);
 
 app.listen(port, () => console.log(`Server is currently running on port ${port}.`));
