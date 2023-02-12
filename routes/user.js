@@ -2,7 +2,7 @@ const User = require("../models/user");
 const postRoute = require("./post");
 const router = require("express").Router();
 const jwt = require("jsonwebtoken");
-const auth = require("../middleware/auth");
+const auth = require("../middleware/verifyUser");
 require('dotenv').config()
 
 // CREATING USER IS IN ./REGISTER
