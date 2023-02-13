@@ -19,7 +19,14 @@ router.get("/", (req, res, next) => {
 
 // Get specific user
 router.get("/:userId", (req, res, next) => {
-    User.find({_id: req.params.userId}, (err, results) => {
+    User.find({_id: req.params.userId})
+        .populate({
+            path: 'posts',
+            populate: {
+                path: 'user'
+            }
+        })
+        .exec((err, results) => {
         if (err) {
             return next(err);
         }
