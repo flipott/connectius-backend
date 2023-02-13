@@ -44,6 +44,7 @@ router.get("/:postId", (req, res, next) => {
 
 // Create post
 router.post("/", (req, res, next) => {
+    console.log(req);
     if (req.params.userId) {
         const post = new Post({
             user: mongoose.Types.ObjectId(req.params.userId),
