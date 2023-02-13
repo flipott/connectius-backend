@@ -25,7 +25,8 @@ router.post("/", (req, res, next) => {
                     // Passwords match
                     const token = jwt.sign({ user }, process.env.SECRET, { expiresIn: "30s" });
                     res.json({
-                        token: token
+                        token: token,
+                        user: user.id
                     });
                 } else {
                     // Passwords do not match
