@@ -15,9 +15,17 @@ const db = mongoose.connection;
 db.on("error", console.error.bind(console, "Error connecting to Mongo DB"));
 const app = express();
 
+app.use(function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "X-Requested-With");
+    next();
+    });
+
 app.use(express.json());
 app.use(cors());
 
+
+  
 
 app.get("/", (req, res) => {
 });
