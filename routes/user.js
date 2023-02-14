@@ -3,6 +3,7 @@ const postRoute = require("./post");
 const router = require("express").Router();
 const jwt = require("jsonwebtoken");
 const auth = require("../middleware/verifyUser");
+const user = require("../models/user");
 require('dotenv').config()
 
 // CREATING USER IS IN ./REGISTER
@@ -14,6 +15,56 @@ router.get("/", (req, res, next) => {
             return next(err);
         }
         res.json(results);
+    });
+});
+
+// Create Connection Request for user (recipient)
+router.post("/:userId/request", (req, res, next) => {
+    User.find({ _id: req.params.userId }, (err, results) => {
+        if (err) {
+            return next(err);
+        }
+        const userReqs = results[0].requests;
+        if (userReqs.includes(req.body.currentUser)) {
+            res.json(null);
+        } else {
+            User.findByIdAndUpdate(
+                req.params.userId,
+                { $push: { requests: req.body.currentUser } },
+                { new: true },
+                (err, results) => {
+                    if (err) {
+                        return next(err);
+                    }
+                    res.json(results);
+                }
+            );
+        }
+    });
+});
+
+// Cancel Conntection Request for user (recipient)
+router.delete("/:userId/request", (req, res, next) => {
+    User.find({ _id: req.params.userId }, (err, results) => {
+        if (err) {
+            return next(err);
+        }
+        const userReqs = results[0].requests;
+        if (!userReqs.includes(req.body.currentUser)) {
+            res.json(null);
+        } else {
+            User.findByIdAndUpdate(
+                req.params.userId,
+                { $pull: { requests: req.body.currentUser } },
+                { new: true },
+                (err, results) => {
+                    if (err) {
+                        return next(err);
+                    }
+                    res.json(results);
+                }
+            );
+        }
     });
 });
 
