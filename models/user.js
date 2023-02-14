@@ -9,6 +9,7 @@ const UserSchema = new Schema({
     profilePicture: { data: Buffer, contentType: String },
     posts: [{ type: Schema.Types.ObjectId, ref: "Post" }],
     connections: [{ type: Schema.Types.ObjectId, ref: "User" }],
+    requests: [{ type: Schema.Types.ObjectId, ref: "User" }],
     liked: [{ type: Schema.Types.ObjectId, ref: "Post" }],
     comments: [{ type: Schema.Types.ObjectId, ref: "Comment" }],
     created: { type: Date, default: Date.now },
