@@ -3,7 +3,8 @@ const postRoute = require("./post");
 const router = require("express").Router();
 const jwt = require("jsonwebtoken");
 const auth = require("../middleware/verifyUser");
-const user = require("../models/user");
+const Request = require("../models/request");
+const Connection = require("../models/connection");
 require('dotenv').config()
 
 // CREATING USER IS IN ./REGISTER
@@ -28,17 +29,22 @@ router.post("/:userId/request", (req, res, next) => {
         if (userReqs.includes(req.body.currentUser)) {
             res.json(null);
         } else {
-            User.findByIdAndUpdate(
-                req.params.userId,
-                { $push: { requests: req.body.currentUser } },
-                { new: true },
-                (err, results) => {
-                    if (err) {
-                        return next(err);
-                    }
-                    res.json(results);
+            const request = new Request( { user: req.body.currentUser }).save((err, result) => {
+                if (err) {
+                    return next(err)
                 }
-            );
+                User.findByIdAndUpdate(
+                    req.params.userId,
+                    { $push: { requests: result } },
+                    { new: true },
+                    (err, results) => {
+                        if (err) {
+                            return next(err);
+                        }
+                        res.json(results);
+                    }
+                );
+            });
         }
     });
 });
@@ -68,15 +74,63 @@ router.delete("/:userId/request", (req, res, next) => {
     });
 });
 
+// Accept Connection for a user
+router.post("/:userId/connections", (req, res, next) => {
+    const userConnection = new Connection({
+        user: req.params.userId
+    }).save((err, results) => {
+        if (err) {
+            return next(err);
+        }
+        User.findByIdAndUpdate(
+            req.params.userId,
+            { $push: { connections: results }, 
+              $pull: { requests: req.body.recipient}
+            },
+            { new: true },
+            (err, results) => {
+                if (err) {
+                    return next(err);
+                }
+                const recipientConnection = new Connection({
+                    user: req.body.recipient
+                }).save((err, results) => {
+                    if (err) {
+                        return next(err)
+                    }
+                    User.findByIdAndUpdate(
+                        req.body.recipient,
+                        { $push: { connections: results }, 
+                          $pull: { requests: req.params.userId}
+                        },
+                        { new: true },
+                        (err, finalResults) => {
+                            if (err) {
+                                return next(err);
+                            }
+                            res.json(finalResults);
+                        }
+                    );
+                });
+             }
+        );
+    });
+});
+
 // Get specific user
 router.get("/:userId", (req, res, next) => {
     User.find({_id: req.params.userId})
-        .populate({
+        .populate([{
             path: 'posts',
             populate: {
                 path: 'user'
             }
-        })
+        }, {
+            path: 'requests',
+            populate: {
+                path: 'user'
+            } 
+        }])
         .exec((err, results) => {
         if (err) {
             return next(err);
