@@ -11,7 +11,10 @@ require('dotenv').config()
 router.get("/", (req, res, next) => {
     // If getting specific user posts
     if (req.params.userId) {
-        Post.find({ user: req.params.userId }, (err, results) => {
+        Post.find({ user: req.params.userId })
+        .populate("user")
+        .sort({ time: -1 })
+        .exec((err, results) => {
             if (err) {
                 return next(err);
             }
@@ -19,12 +22,15 @@ router.get("/", (req, res, next) => {
         });
     } else {
     // If getting all posts
-        Post.find({}, (err, results) => {
+        Post.find({ user: { $in: req.query.userList }})
+            .populate("user")
+            .sort({ time: -1 })
+            .exec((err, results) => {
             if (err) {
                 return next(err);
             }
             res.json(results);
-        });
+        })
     }
 });
 
