@@ -25,6 +25,8 @@ router.post("/:userId/request", (req, res, next) => {
             return next(err);
         }
         const userReqs = results[0].requests;
+        
+        // Make sure user hasn't already received a request
         if (userReqs.includes(req.body.currentUser)) {
             res.json(null);
         } else {
@@ -45,30 +47,32 @@ router.post("/:userId/request", (req, res, next) => {
 
 // Cancel Conntection Request for user (recipient)
 router.delete("/:userId/request", (req, res, next) => {
-    User.find({ _id: req.params.userId }, (err, results) => {
-        if (err) {
-            return next(err);
-        }
-        const userReqs = results[0].requests;
-        if (!userReqs.includes(req.body.currentUser)) {
-            res.json(null);
-        } else {
+    User.findByIdAndUpdate(
+        req.params.userId,
+        { $pull: { requests: req.body.currentUser } },
+        { new: true },
+        (err, results) => {
+            if (err) {
+                return next(err);
+            }
             User.findByIdAndUpdate(
-                req.params.userId,
-                { $pull: { requests: req.body.currentUser } },
+                req.body.currentUser,
+                { $pull: { requests: req.params.userId } },
                 { new: true },
                 (err, results) => {
                     if (err) {
-                        return next(err);
+                        return next(err)
                     }
                     res.json(results);
                 }
             );
         }
-    });
+    );
 });
 
-// Accept Connection for a user
+
+
+// Create Connections for users
 router.post("/:userId/connections", (req, res, next) => {
     User.findByIdAndUpdate(
         req.params.userId,
@@ -92,6 +96,31 @@ router.post("/:userId/connections", (req, res, next) => {
                 }
                 res.json(results);
               }
+            );
+        }
+    );
+});
+
+// Remove Connections for users
+router.delete("/:userId/connections", (req, res, next) => {
+    User.findByIdAndUpdate(
+        req.params.userId,
+        { $pull: { connections: req.body.currentUser, requests: req.body.currentUser } },
+        { new: true },
+        (err, results) => {
+            if (err) {
+                return next(err);
+            }
+            User.findByIdAndUpdate(
+                req.body.currentUser,
+                { $pull: { connections: req.params.userId, requests: req.params.userId } },
+                { new: true },
+                (err, results) => {
+                if (err) {
+                    return next(err);
+                }
+                res.json(results);
+                }
             );
         }
     );
