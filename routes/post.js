@@ -20,8 +20,8 @@ router.get("/", (req, res, next) => {
             }
             res.json(results);
         });
-    } else {
-    // If getting all posts
+    } else if (req.query.userList) {
+    // If getting all posts from certain users
         Post.find({ user: { $in: req.query.userList }})
             .populate("user")
             .sort({ time: -1 })
@@ -30,12 +30,25 @@ router.get("/", (req, res, next) => {
                 return next(err);
             }
             res.json(results);
+        });
+    } else if (req.query.postList) {
+    // If getting all liked posts from certain users
+        Post.find({ _id: { $in: req.query.postList }})
+        .populate("user")
+        .sort({ time: -1 })
+            .exec((err, results) => {
+            if (err) {
+                return next(err);
+            }
+            console.log(results);
+            res.json(results);
         })
     }
 });
 
 // Get specific post
 router.get("/:postId", (req, res, next) => {
+    console.log("HERE")
     if (req.params.userId) {
         Post.find({ _id: req.params.postId, user: req.params.userId }, (err, results) => {
             if (err) {
@@ -44,7 +57,7 @@ router.get("/:postId", (req, res, next) => {
             res.json(results);
         });
     } else {
-        res.json("Must have user ID in URI");
+        res.json("YEP.");
     }
 })
 
