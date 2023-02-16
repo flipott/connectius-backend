@@ -100,4 +100,54 @@ router.delete("/:postId", (req, res, next) => {
     }
 });
 
+// Add like to post and user
+router.post("/:postId/like", (req, res, next) => {
+    Post.findByIdAndUpdate(
+        req.params.postId,
+        { $push: { likes: req.body.currentUser }},
+        { new: true },
+        (err, results) => {
+            if (err) {
+                return next(err);
+            }
+            User.findByIdAndUpdate(
+                req.body.currentUser,
+                { $push: { liked: results._id }},
+                {new: true },
+                (err, results) => {
+                    if (err) {
+                        return next(err);
+                    }
+                    res.json(results);
+                }
+            );
+        }
+    );
+});
+
+// Remove like from post and user
+router.delete("/:postId/like", (req, res, next) => {
+    Post.findByIdAndUpdate(
+        req.params.postId,
+        { $pull: { likes: req.body.currentUser }},
+        { new: true },
+        (err, results) => {
+            if (err) {
+                return next(err);
+            }
+            User.findByIdAndUpdate(
+                req.body.currentUser,
+                { $pull: { liked: results._id }},
+                {new: true },
+                (err, results) => {
+                    if (err) {
+                        return next(err);
+                    }
+                    res.json(results);
+                }
+            );
+        }
+    );
+});
+
 module.exports = router;
