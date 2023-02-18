@@ -40,7 +40,6 @@ router.get("/", (req, res, next) => {
             if (err) {
                 return next(err);
             }
-            console.log(results);
             res.json(results);
         })
     }
@@ -115,27 +114,36 @@ router.delete("/:postId", (req, res, next) => {
 
 // Add like to post and user
 router.post("/:postId/like", (req, res, next) => {
-    Post.findByIdAndUpdate(
-        req.params.postId,
-        { $push: { likes: req.body.currentUser }},
-        { new: true },
-        (err, results) => {
-            if (err) {
-                return next(err);
-            }
-            User.findByIdAndUpdate(
-                req.body.currentUser,
-                { $push: { liked: results._id }},
-                {new: true },
+    Post.findById(req.params.postId, (err, results) => {
+        if (err) {
+            return next(err);
+        }
+        const postLikes = results.likes;
+        if (!postLikes.includes(req.body.currentUser)) {
+            Post.findByIdAndUpdate(
+                req.params.postId,
+                { $push: { likes: req.body.currentUser }},
+                { new: true },
                 (err, results) => {
                     if (err) {
                         return next(err);
                     }
-                    res.json(results);
+                    User.findByIdAndUpdate(
+                        req.body.currentUser,
+                        { $push: { liked: results._id }},
+                        {new: true },
+                        (err, results) => {
+                            if (err) {
+                                return next(err);
+                            }
+                            res.json(results);
+                        }
+                    );
                 }
             );
         }
-    );
+    });
+
 });
 
 // Remove like from post and user
