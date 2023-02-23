@@ -4,6 +4,9 @@ const routes = require("./routes/index");
 const User = require("./models/user");
 const jwt = require("jsonwebtoken");
 const cors = require("cors");
+const multer = require("multer");
+const path = require("path");
+
 require('dotenv').config()
 
 const { API_PORT } = process.env;
@@ -15,6 +18,18 @@ const db = mongoose.connection;
 db.on("error", console.error.bind(console, "Error connecting to Mongo DB"));
 const app = express();
 
+// const storage = multer.diskStorage({
+//     destination: (req, file, cb) => {
+//         cb(null, 'uploads')
+//     },
+//     filename: (req, file, cb) => {
+//         cb(null, `${file.fieldname}-${Date.now()}`)
+//     }
+// });
+
+// const upload = multer({ storage: storage });
+
+
 app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "X-Requested-With");
@@ -23,8 +38,6 @@ app.use(function(req, res, next) {
 
 app.use(express.json());
 app.use(cors());
-
-
   
 
 app.get("/", (req, res) => {
@@ -40,3 +53,4 @@ app.use("/login", routes.login);
 app.use("/auth", routes.auth);
 
 app.listen(port, () => console.log(`Server is currently running on port ${port}.`));
+
