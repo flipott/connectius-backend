@@ -7,6 +7,24 @@ const auth = require("../middleware/verifyUser");
 const Connection = require("../models/connection");
 const bcrypt = require("bcryptjs");
 const { body, validationResult } = require("express-validator");
+const multer = require("multer");
+const fs = require("fs");
+const path = require("path");
+
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, "/uploads");
+    },
+    filename: function (req, file, cb) {
+      cb(
+        null,
+        "TESTINGTESTINGS"
+      );
+    },
+  });
+  
+const upload = multer({ dest: 'uploads/' });
+
 
 require('dotenv').config()
 
@@ -145,6 +163,29 @@ router.get("/:userId", (req, res, next) => {
         }
         res.json(results);
     });
+});
+
+// Upload user photo
+router.post("/:userId/photo", upload.single('file'), (req, res, next) => {
+
+    const img = fs.readFileSync(req.file.path);
+    const encode_img = img.toString('base64');
+    const final_img = {
+        contentType: req.file.mimetype,
+        data: Buffer.from(encode_img, 'base64')
+    };
+
+    User.findByIdAndUpdate(
+        req.params.userId,
+        { profilePicture: final_img },
+        { new: true },
+        (err, results) => {
+            if (err) {
+                return next(err);
+            }
+            res.json(results);
+        }
+    );
 });
 
 // Update user name
