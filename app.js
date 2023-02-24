@@ -18,18 +18,6 @@ const db = mongoose.connection;
 db.on("error", console.error.bind(console, "Error connecting to Mongo DB"));
 const app = express();
 
-// const storage = multer.diskStorage({
-//     destination: (req, file, cb) => {
-//         cb(null, 'uploads')
-//     },
-//     filename: (req, file, cb) => {
-//         cb(null, `${file.fieldname}-${Date.now()}`)
-//     }
-// });
-
-// const upload = multer({ storage: storage });
-
-
 app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "X-Requested-With");
