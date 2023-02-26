@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const auth = require("../middleware/verifyUser");
 const bcrypt = require("bcryptjs");
 const { body, validationResult } = require("express-validator");
+const handleString = require("../middleware/handleString");
 require('dotenv').config()
 
 // Create a user
@@ -28,6 +29,7 @@ router.post(
         return true;
     }),
     (req, res, next) => {
+
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             return res.status(400).json({ errors: errors.array()}); 
@@ -43,8 +45,8 @@ router.post(
                 }
                 if (!results.length) {
                     const user = new User({
-                        firstName: req.body["first-name"],
-                        lastName: req.body["last-name"],
+                        firstName: handleString(req.body["first-name"]),
+                        lastName: handleString(req.body["last-name"]),
                         email: req.body.email,
                         password: hashedPassword,
                     }).save((err, results) => {

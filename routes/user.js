@@ -11,6 +11,7 @@ const multer = require("multer");
 const fs = require("fs");
 const path = require("path");
 const verifyUser = require("../middleware/verifyUser");
+const handleString = require("../middleware/handleString");
 require('dotenv').config();
 
 // router.get("/", verifyUser, (req, res, next) => {
@@ -31,7 +32,7 @@ const storage = multer.diskStorage({
     filename: function (req, file, cb) {
       cb(
         null,
-        "TESTINGTESTINGS"
+        "tempfile"
       );
     },
   });
@@ -259,7 +260,7 @@ router.put("/:userId/name",
                 if (req.body.firstName) {
                     User.findByIdAndUpdate(
                         req.params.userId,
-                        { firstName: req.body.firstName, lastName: req.body.lastName },
+                        { firstName: handleString(req.body.firstName), lastName: handleString(req.body.lastName) },
                         { new: true },
                         (err, results) => {
                             if (err) {
