@@ -23,7 +23,7 @@ router.post("/", (req, res, next) => {
                 }
                 if (pasRes) {
                     // Passwords match
-                    const token = jwt.sign({ user }, process.env.SECRET, { expiresIn: "3m" });
+                    const token = jwt.sign({ user }, process.env.SECRET, { expiresIn: "10m" });
                     res.json({
                         token: token,
                         user: user.id
