@@ -1,9 +1,7 @@
 const User = require("../models/user");
 const router = require("express").Router();
 const jwt = require("jsonwebtoken");
-const verifyUser = require("../middleware/verifyUser");
 const bcrypt = require("bcryptjs");
-const { body, validationResult } = require("express-validator");
 require('dotenv').config();
 
 router.post("/", (req, res, next) => {
@@ -36,7 +34,5 @@ router.post("/", (req, res, next) => {
         }
     });
 });
-
-
 
 module.exports = router;

@@ -3,27 +3,13 @@ const Post = require("../models/post");
 const postRoute = require("./post");
 const router = require("express").Router();
 const jwt = require("jsonwebtoken");
-const auth = require("../middleware/verifyUser");
-const Connection = require("../models/connection");
 const bcrypt = require("bcryptjs");
 const { body, validationResult } = require("express-validator");
 const multer = require("multer");
 const fs = require("fs");
-const path = require("path");
 const verifyUser = require("../middleware/verifyUser");
 const handleString = require("../middleware/handleString");
 require('dotenv').config();
-
-// router.get("/", verifyUser, (req, res, next) => {
-//     jwt.verify(req.token, process.env.SECRET, (err, results) => {
-//         if (err) {
-//             res.status(200).send({"result": "false"})
-//         } else {
-//             res.status(200).send({"result": "true"})
-//         }
-//     });
-
-
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -38,9 +24,6 @@ const storage = multer.diskStorage({
   });
   
 const upload = multer({ dest: 'uploads/' });
-
-
-require('dotenv').config()
 
 // CREATING USER IS IN ./REGISTER
 
@@ -421,7 +404,5 @@ router.delete("/:userId", verifyUser, (req, res, next) => {
 
 // Create user post
 router.use("/:userId/post", postRoute);
-
-
 
 module.exports = router;
